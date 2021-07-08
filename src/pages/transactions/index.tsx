@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { FlatList, ListRenderItemInfo, StyleSheet, Text, View } from 'react-native'
+import { FlatList, ListRenderItemInfo, StyleSheet, View } from 'react-native'
 import {getStatusBarHeight} from 'react-native-iphone-x-helper'
 import Icon from '@/assets/iconfont/index';
 import dayjs from 'dayjs'
@@ -9,6 +9,7 @@ import TransactionItem from './transactionItem';
 import { RootState } from '@/models/index';
 import useMount from '@/utils/use-mount';
 import { ITransaction } from '@/models/transaction';
+import { Flex, Text, AlertDialog, Button } from 'native-base';
 
 const connector = connect(({transaction} :RootState) => ({
   transactions: transaction.transactions
@@ -22,9 +23,11 @@ const namespace = 'transaction'
 
 const Transactions: React.FC<TransactionsProps> = ({transactions, dispatch}) => {
 
-  const [month, setMonth] = useState(dayjs().subtract(1, 'months').format('YYYY-MM'))
+  const [month, setMonth] = useState(dayjs().format('YYYY-MM'))
 
   const [loading, setLoading] = useState(false)
+
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   useMount(() => {
     fetchTransactions()
@@ -35,16 +38,12 @@ const Transactions: React.FC<TransactionsProps> = ({transactions, dispatch}) => 
     dispatch({type: `${namespace}/fetchTransactions`, cb: () => {setLoading(false)}, payload: {month}})
   }
 
-  const openMonthPickerModal = () => {
-    console.log('open month picker modal')
-  }
-
   const toDetail = (id: string) => {
     console.log('press')
   }
 
   const deleteTransaction = (id: string) => {
-    console.log('long press')
+    setShowDeleteDialog(true)
   }
 
   const renderItem = ({item}: ListRenderItemInfo<ITransaction>) => <TransactionItem transaction={item} onPress={toDetail} onLongPress={deleteTransaction} />
@@ -64,15 +63,43 @@ const Transactions: React.FC<TransactionsProps> = ({transactions, dispatch}) => 
 
   const keyExtractor = (item: ITransaction) => item.id as string
 
+  const cancelRef = React.useRef();
+
   return (
     <>
       <View style={styles.container}>
         <Text style={styles.title}>所有交易</Text>
-        <TouchableOpacity activeOpacity={0.4} style={styles.monthPicker} onPress={openMonthPickerModal}>
-          <Text>{month}</Text>
-          <Icon name='icon-down' />
-        </TouchableOpacity>
+        <Flex direction="row" justifyContent="space-between" mt="3">
+          <TouchableOpacity activeOpacity={0.4} onPress={() => setMonth(dayjs(month).subtract(1, "months").format("YYYY-MM"))}>
+            <Icon name='icon-leftarrow' size={24} />
+          </TouchableOpacity>
+          <Text fontSize='lg' fontWeight='bold'>{month}</Text>
+          <TouchableOpacity activeOpacity={0.4} onPress={() => setMonth(dayjs(month).add(1, "months").format("YYYY-MM"))}>
+            <Icon name='icon-Rightarrow' size={24} />
+          </TouchableOpacity>
+        </Flex>
       </View>
+      <AlertDialog isOpen={showDeleteDialog} leastDestructiveRef={cancelRef} onClose={() => setShowDeleteDialog(false)}>
+        <AlertDialog.Content>
+          <AlertDialog.Header>
+            <Text fontSize="lg" fontWeight="bold">
+              删除
+            </Text>
+          </AlertDialog.Header>
+          <AlertDialog.Body>
+            确定要删除吗? 该操作无法撤销.
+          </AlertDialog.Body>
+          <AlertDialog.Footer>
+            <Button ref={cancelRef} onPress={() => setShowDeleteDialog(false)}>
+              取消
+            </Button>
+            <Button colorScheme="danger" _text={{color: 'white'}} onPress={() => setShowDeleteDialog(false)} ml={3}>
+              删除
+            </Button>
+          </AlertDialog.Footer>
+        </AlertDialog.Content>
+      </AlertDialog>
+      {/* FlatList重复渲染，导致update很慢 */}
       <FlatList
         ListFooterComponent={footer}
         ListEmptyComponent={empty}

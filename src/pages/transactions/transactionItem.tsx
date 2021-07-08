@@ -10,7 +10,7 @@ interface TransactionItemProps {
   onLongPress: (id: string) => void
 }
 
-const TransactionItem: React.FC<TransactionItemProps> = ({transaction, onPress, onLongPress}) => {
+const TransactionItem: React.FC<TransactionItemProps> = React.memo(({transaction, onPress, onLongPress}) => {
   const {id, category, price, date, description} = transaction
   const getClass = () => category.type === 'expense' ? styles.expense : styles.income
   const getPrice = () => `${category.type === 'expense' ? '-' : '+'}${price} ¥`
@@ -19,7 +19,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({transaction, onPress, 
     <>
       <Pressable android_ripple={{color: '#7DD3FC'}} style={styles.transactionWrapper} onLongPress={() => onLongPress(id as string)} onPress={() => onPress(id as string)} >
         <View style={styles.icon}>
-          <Icon name={category.icon} size={50} />
+          <Icon name={category.icon} size={38} />
         </View>
         <View style={styles.left}>
           <Text style={styles.mainInfo}>{category.name}</Text>
@@ -32,14 +32,14 @@ const TransactionItem: React.FC<TransactionItemProps> = ({transaction, onPress, 
       </Pressable>
     </>
   )
-}
+})
 
 const styles = StyleSheet.create({
   transactionWrapper: {
     width: wp(95),
     marginTop: 20,
     marginLeft: wp(2.5),
-    height: 80,
+    height: 60,
     backgroundColor: '#fff',
     borderRadius: 10,
     elevation: 10,
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     marginLeft: 10
   },
   mainInfo: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: 'bold'
   },
   metaItem: {

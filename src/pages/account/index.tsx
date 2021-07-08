@@ -1,12 +1,21 @@
 import React from 'react'
-import { Text, View } from 'react-native'
+import { Center, Box } from 'native-base'
 
 const Account: React.FC = () => {
   return (
     <>
-      <View style={{display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1}}>
-        <Text>This is The Account Page</Text>
-      </View>
+      <Center flex={1}>
+        <Box
+          bg="primary.400"
+          p={4}
+          _text={{
+            fontSize: 'md',
+            fontWeight: 'bold',
+            color: 'white',
+          }}>
+          This is The Account Page
+        </Box>
+      </Center>
     </>
   )
 }

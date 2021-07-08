@@ -1,12 +1,21 @@
 import React from 'react'
-import { Text, View } from 'react-native'
+import { Center, Box } from 'native-base'
 
 const Templates: React.FC = () => {
   return (
     <>
-      <View style={{display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1}}>
-        <Text>This is The Templates Page</Text>
-      </View>
+      <Center flex={1}>
+        <Box
+          bg="primary.400"
+          p={4}
+          _text={{
+            fontSize: 'md',
+            fontWeight: 'bold',
+            color: 'white',
+          }}>
+          This is The Templates Page
+        </Box>
+      </Center>
     </>
   )
 }

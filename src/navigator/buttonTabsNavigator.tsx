@@ -33,10 +33,8 @@ export default function buttonTabsNavigator() {
           style:{
             borderTopRightRadius: 10,
             borderTopLeftRadius: 10,
-            paddingTop: 15,
-            paddingBottom: 15,
-            height: 80,
-          }
+            height: 50,
+          },
         }}>
         <Tab.Screen
           name="Home"

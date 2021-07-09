@@ -3,6 +3,7 @@ import { Reducer } from 'redux';
 import axios from 'axios'
 import { IconNames } from '@/assets/iconfont';
 import dayjs from 'dayjs'
+import { RootState } from '.';
 
 const TRANSACTION_URL = '/record'
 
@@ -22,8 +23,14 @@ export interface ICategory {
   type: 'expense' | 'income';
 }
 
-interface TransactionState {
-  transactions: ITransaction[]
+export interface TransactionState {
+  transactions: ITransaction[],
+  pagination: {
+    _page: number,
+    _limit: number,
+    total: number,
+    hasMore: boolean
+  }
 }
 
 interface TransactionModel extends Model {
@@ -40,7 +47,13 @@ interface TransactionModel extends Model {
 // {id: '1', date: '2020-07-07', timestamp: 100, description: '111', price: 50, category: {id: '1', name:'餐饮', icon: 'icon-food', type: 'expense'}}
 
 const initialState: TransactionState = {
-  transactions: []
+  transactions: [],
+  pagination: {
+    _page: 1,
+    _limit: 10,
+    total: 0,
+    hasMore: true
+  }
 }
 
 const transactionModel: TransactionModel = {
@@ -55,21 +68,35 @@ const transactionModel: TransactionModel = {
     }
   },
   effects: {
-    *fetchTransactions({cb, payload}, {call, put}) {
-      const month = payload?.month || dayjs().format('YYYY-MM')
-      const { list } = yield call(axios.get, TRANSACTION_URL, {
+    *fetchTransactions({payload, cb}, {call, put, select}) {
+      const { transactions, pagination } = yield select((state: RootState) => state.transaction)
+      const { _page: curPage, _limit } = pagination
+      let _page = 1
+      const loadMore = payload && payload.loadMore
+      if (loadMore) {
+        _page = curPage + 1
+      }
+      const { list, total } = yield call(axios.get, TRANSACTION_URL, {
         params: {
-          'date_like': month
+          _page,
+          _limit
         }
       })
+      const newTransactions = loadMore ? transactions.concat(list) : list
       yield put({
         type: 'setState',
         payload: {
-          transactions: list
+          transactions: newTransactions,
+          pagination: {
+            _page,
+            _limit,
+            total,
+            hasMore: total > newTransactions.length
+          }
         }
       })
-      if(typeof cb === 'function') {
-        cb();
+      if (typeof cb === 'function') {
+        cb()
       }
     }
   }

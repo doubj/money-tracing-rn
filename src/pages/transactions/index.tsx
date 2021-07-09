@@ -11,8 +11,10 @@ import useMount from '@/utils/use-mount';
 import { ITransaction } from '@/models/transaction';
 import { Flex, Text, AlertDialog, Button } from 'native-base';
 
-const connector = connect(({transaction} :RootState) => ({
-  transactions: transaction.transactions
+const connector = connect(({transaction, loading} :RootState) => ({
+  transactions: transaction.transactions,
+  hasMore: transaction.pagination.hasMore,
+  loading: loading.effects[namespace + '/fetchTransactions']
 }));
 
 type ModelState = ConnectedProps<typeof connector>
@@ -21,21 +23,28 @@ interface TransactionsProps extends ModelState {}
 
 const namespace = 'transaction'
 
-const Transactions: React.FC<TransactionsProps> = ({transactions, dispatch}) => {
+const Transactions: React.FC<TransactionsProps> = ({transactions, dispatch, loading, hasMore}) => {
 
   const [month, setMonth] = useState(dayjs().format('YYYY-MM'))
 
-  const [loading, setLoading] = useState(false)
+  const [refresh, setRefresh] = useState(false)
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   useMount(() => {
-    fetchTransactions()
+    dispatch({type: `${namespace}/fetchTransactions`})
   })
 
-  const fetchTransactions = () => {
-    setLoading(true)
-    dispatch({type: `${namespace}/fetchTransactions`, cb: () => {setLoading(false)}, payload: {month}})
+  const fetchMore = () => {
+    dispatch({type: `${namespace}/fetchTransactions`, payload: { loadMore: true }})
+  }
+
+  const onRefresh = () => {
+    if (loading || refresh) {
+      return
+    }
+    setRefresh(true)
+    dispatch({type: `${namespace}/fetchTransactions`, cb: () => {setRefresh(false)}})
   }
 
   const toDetail = (id: string) => {
@@ -48,16 +57,15 @@ const Transactions: React.FC<TransactionsProps> = ({transactions, dispatch}) => 
 
   const renderItem = ({item}: ListRenderItemInfo<ITransaction>) => <TransactionItem transaction={item} onPress={toDetail} onLongPress={deleteTransaction} />
 
-  const footer = () => (
-    <>
-      {
-        transactions.length > 0 &&
-        <View style={styles.footer}>
-          <Text>--已经到底啦--</Text>
-        </View>
-      }
-    </>
-  )
+  const footer = () => {
+    if (!hasMore) {
+      return (<>{<View style={styles.footer}><Text>--已经到底啦--</Text></View>}</>)
+    }
+    if (hasMore && loading && transactions.length > 0) {
+      return (<>{<View style={styles.footer}><Text>加载中...</Text></View>}</>)
+    }
+    return <></>
+  }
 
   const empty = () =>  (<View style={styles.empty}><Text>暂无数据</Text></View>)
 
@@ -90,10 +98,10 @@ const Transactions: React.FC<TransactionsProps> = ({transactions, dispatch}) => 
             确定要删除吗? 该操作无法撤销.
           </AlertDialog.Body>
           <AlertDialog.Footer>
-            <Button ref={cancelRef} onPress={() => setShowDeleteDialog(false)}>
+            <Button py={2} px={6} borderRadius={30} ref={cancelRef} onPress={() => setShowDeleteDialog(false)}>
               取消
             </Button>
-            <Button colorScheme="danger" _text={{color: 'white'}} onPress={() => setShowDeleteDialog(false)} ml={3}>
+            <Button py={2} px={6} borderRadius={30} colorScheme="danger" _text={{color: 'white'}} onPress={() => setShowDeleteDialog(false)} ml={3}>
               删除
             </Button>
           </AlertDialog.Footer>
@@ -106,8 +114,10 @@ const Transactions: React.FC<TransactionsProps> = ({transactions, dispatch}) => 
         data={transactions}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
-        refreshing={loading}
-        onRefresh={fetchTransactions}
+        refreshing={refresh}
+        onRefresh={onRefresh}
+        onEndReached={fetchMore}
+        onEndReachedThreshold={0.2}
       />
     </>
   )

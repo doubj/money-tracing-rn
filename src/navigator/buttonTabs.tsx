@@ -1,20 +1,19 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Home from './index';
-import Transactions from '@/pages/transactions';
+import Home from '@/pages/home';
 import Templates from '@/pages/templates';
 import Account from '@/pages/account';
 import Icon, { IconNames } from '@/assets/iconfont/index';
+import Transactions from '@/pages/transactions';
 
-export type RootStackParamList = {
+export type BottomTabParamList = {
   Home: undefined,
   Transactions: undefined,
   Templates: undefined,
   Account: undefined,
 }
 
-const Tab = createBottomTabNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator<BottomTabParamList>();
 
 const tabIconRender = (name: IconNames, props: {focused: boolean, color: string, size: number,}) => {
   const {color, size} = props
@@ -23,7 +22,6 @@ const tabIconRender = (name: IconNames, props: {focused: boolean, color: string,
 
 export default function buttonTabsNavigator() {
   return (
-    <NavigationContainer>
       <Tab.Navigator
         lazy
         tabBarOptions={{
@@ -69,6 +67,5 @@ export default function buttonTabsNavigator() {
           }}
         />
       </Tab.Navigator>
-    </NavigationContainer>
   );
 }

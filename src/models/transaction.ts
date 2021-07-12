@@ -2,7 +2,6 @@ import { Effect, Model } from 'dva-core-ts'
 import { Reducer } from 'redux';
 import axios from 'axios'
 import { IconNames } from '@/assets/iconfont';
-import dayjs from 'dayjs'
 import { RootState } from '.';
 
 const TRANSACTION_URL = '/record'

@@ -3,9 +3,9 @@ import { StatusBar } from 'react-native';
 import Navigator from '@/navigator/index';
 import 'react-native-gesture-handler';
 import { Provider } from 'react-redux'
+import '@/config/http';
 import store from '@/config/dva'
 import { NativeBaseProvider } from 'native-base';
-import '@/config/http';
 
 export default () => {
   return (

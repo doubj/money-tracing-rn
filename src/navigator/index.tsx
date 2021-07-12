@@ -18,7 +18,6 @@ export default () => {
   return (
       <NavigationContainer>
         <Stack.Navigator
-          headerMode={'none'}
           mode="card"
           screenOptions={{
             headerTitleAlign: 'center',
@@ -35,8 +34,8 @@ export default () => {
               })
             }
           }}>
-          <Stack.Screen options={{headerTitle: '首页'}} name="ButtonTabs" component={ButtonTabs} />
-          <Stack.Screen options={{headerTitle: '筛选'}} name="Filter" component={Filter} />
+          <Stack.Screen options={{headerTitle: '首页', headerShown: false}} name="ButtonTabs" component={ButtonTabs} />
+          <Stack.Screen options={{headerTitle: '筛选', headerShown: true}} name="Filter" component={Filter} />
         </Stack.Navigator>
       </NavigationContainer>
   )

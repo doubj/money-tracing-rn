@@ -5,10 +5,11 @@ import Templates from '@/pages/templates';
 import Account from '@/pages/account';
 import Icon, { IconNames } from '@/assets/iconfont/index';
 import Transactions from '@/pages/transactions';
+import { TransactionPropsType } from '.';
 
 export type BottomTabParamList = {
   Home: undefined,
-  Transactions: undefined,
+  Transactions: TransactionPropsType,
   Templates: undefined,
   Account: undefined,
 }

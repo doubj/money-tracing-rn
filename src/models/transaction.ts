@@ -75,12 +75,12 @@ const transactionModel: TransactionModel = {
       if (loadMore) {
         _page = curPage + 1
       }
-      const { list, total } = yield call(axios.get, TRANSACTION_URL, {
-        params: {
-          _page,
-          _limit
-        }
-      })
+      let params = {_page, _limit}
+      if (payload && payload.params) {
+        params = {...params, ...payload.params}
+      }
+      console.log('fetch params', params)
+      const { list, total } = yield call(axios.get, TRANSACTION_URL, {params})
       const newTransactions = loadMore ? transactions.concat(list) : list
       yield put({
         type: 'setState',

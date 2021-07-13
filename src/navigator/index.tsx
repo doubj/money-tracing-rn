@@ -5,8 +5,18 @@ import { NavigationContainer } from '@react-navigation/native';
 import ButtonTabs from './buttonTabs';
 import Filter from '@/pages/filter';
 
+export type TransactionPropsType = {
+  selectedCategory: string,
+  dateRange: (string | null)[],
+  numberRange: [number | null, number | null],
+  description: string | null
+}
+
 export type RootStackParamList = {
-  ButtonTabs: undefined,
+  ButtonTabs: {
+    screen?: string;
+    params?: TransactionPropsType;
+  },
   Filter: undefined,
 }
 

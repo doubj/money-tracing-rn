@@ -5,6 +5,8 @@ a simple react-native project for money-tracing
 # TODO
 
 ## 基础功能
+- [x] 交易列表页
+- [x] 交易列表检索页
 - [ ] 详情页
 - [ ] 底部添加按钮
 - [ ] 首页
@@ -12,4 +14,3 @@ a simple react-native project for money-tracing
 - [ ] 模板页
 
 ## 优化
-- [ ] 列表页FlatList数据量大重复渲染性能问题

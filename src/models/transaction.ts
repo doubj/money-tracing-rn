@@ -79,7 +79,6 @@ const transactionModel: TransactionModel = {
       if (payload && payload.params) {
         params = {...params, ...payload.params}
       }
-      console.log('fetch params', params)
       const { list, total } = yield call(axios.get, TRANSACTION_URL, {params})
       const newTransactions = loadMore ? transactions.concat(list) : list
       yield put({

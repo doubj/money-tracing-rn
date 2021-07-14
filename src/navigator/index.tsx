@@ -6,10 +6,10 @@ import ButtonTabs from './buttonTabs';
 import Filter from '@/pages/filter';
 
 export type TransactionPropsType = {
-  selectedCategory: string,
-  dateRange: (string | null)[],
-  numberRange: [number | null, number | null],
-  description: string | null
+  selectedCategory: string | undefined,
+  dateRange: (string | undefined)[],
+  numberRange: [number | undefined, number | undefined],
+  description: string | undefined
 }
 
 export type RootStackParamList = {
@@ -17,7 +17,10 @@ export type RootStackParamList = {
     screen?: string;
     params?: TransactionPropsType;
   },
-  Filter: undefined,
+  Filter: {
+    query: TransactionPropsType,
+    descriptionAutofocus?: boolean
+  },
 }
 
 export type RootStackNavigation = StackNavigationProp<RootStackParamList>;

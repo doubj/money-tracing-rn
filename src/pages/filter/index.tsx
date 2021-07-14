@@ -9,17 +9,20 @@ import {
   Button,
   useDisclose,
   useToast,
+  ScrollView,
 } from 'native-base';
 import {RootState} from '@/models/index';
 import {connect, ConnectedProps} from 'react-redux';
-import {RootStackNavigation} from '@/navigator/index';
+import {RootStackNavigation, RootStackParamList} from '@/navigator/index';
 import Icon from '@/assets/iconfont/index';
 import {ICategory} from '@/models/transaction';
 import DateRangePicker from 'react-native-daterange-picker';
 import moment from 'moment';
-import useMount from '@/utils/use-mount';
 import NumberActionsheet from '@/components/NumberActionsheet';
 import { NativeSyntheticEvent, TextInputSubmitEditingEventData } from 'react-native';
+import { RouteProp } from '@react-navigation/native';
+import { hp } from '@/utils/index';
+import {useHeaderHeight} from '@react-navigation/stack';
 
 const connector = connect(({category}: RootState) => ({
   categories: category.categories,
@@ -29,11 +32,12 @@ type ModelState = ConnectedProps<typeof connector>;
 
 interface FilterProps extends ModelState {
   navigation: RootStackNavigation;
+  route: RouteProp<RootStackParamList, 'Filter'>;
 }
 
-const renderItem = (
+const renderCategoryItem = (
   category: ICategory,
-  selectedId: string,
+  selectedId: string | undefined,
   onPress: (selectedCategory: ICategory) => void,
 ) => {
   return (
@@ -59,36 +63,39 @@ const renderItem = (
   );
 };
 
-const Filter: React.FC<FilterProps> = ({categories, navigation}) => {
+const Filter: React.FC<FilterProps> = ({categories, navigation, route}) => {
   const {isOpen, onOpen, onClose} = useDisclose();
+
+  const headerHeight = useHeaderHeight()
 
   const toast = useToast();
 
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(route.params.query.selectedCategory);
 
   const [numberFocus, setNumberFocus] = useState<-1 | 0 | 1>(-1);
 
   const [numberRange, setNumberRange] = useState<
-    [number | null, number | null]
-  >([null, null]);
+    [number | undefined, number | undefined]
+  >(route.params.query.numberRange);
 
   const [dateObj, setDateObj] = useState<{
-    startDate: moment.Moment | null;
-    endDate: moment.Moment | null;
+    startDate: moment.Moment | undefined;
+    endDate: moment.Moment | undefined;
     displayedDate: moment.Moment;
-  }>({startDate: null, endDate: null, displayedDate: moment()});
+  }>({
+    startDate: route.params.query.dateRange[0] ? moment(route.params.query.dateRange[0]) : undefined,
+    endDate: route.params.query.dateRange[1] ? moment(route.params.query.dateRange[1]) : undefined,
+    displayedDate: moment()});
 
-  const [description, setDescription] = useState<string | null>(null)
+  const [description, setDescription] = useState<string | undefined>(route.params.query.description)
 
-  useMount(() => {
-    // 接收query
-  });
+  const descriptionAutofocus = route.params.descriptionAutofocus
 
   const reset = () => {
-    setDateObj({startDate: null, endDate: null, displayedDate: moment()})
-    setDescription(null)
-    setNumberRange([null, null])
-    setSelectedCategory('')
+    setDateObj({startDate: undefined, endDate: undefined, displayedDate: moment()})
+    setDescription(undefined)
+    setNumberRange([undefined, undefined])
+    setSelectedCategory(undefined)
   };
 
   const confirm = () => {
@@ -120,7 +127,7 @@ const Filter: React.FC<FilterProps> = ({categories, navigation}) => {
     if (numberFocus === 0) {
       setNumberRange([
         num,
-        numberRange[1] && num > numberRange[1] ? null : numberRange[1],
+        numberRange[1] && num > numberRange[1] ? undefined : numberRange[1],
       ]);
     } else if (numberFocus === 1) {
       if (numberRange[0] && num < numberRange[0]) {
@@ -137,8 +144,8 @@ const Filter: React.FC<FilterProps> = ({categories, navigation}) => {
 
   return (
     <>
-      <Box flex={1} bg="white">
-        <Flex direction="column" alignItems="center">
+      <ScrollView flex={1} bg="white">
+        <Flex minHeight={hp(100) - headerHeight} direction="column" alignItems="center">
           <Flex
             mt={4}
             w="100%"
@@ -147,7 +154,7 @@ const Filter: React.FC<FilterProps> = ({categories, navigation}) => {
             alignItems="center"
             justifyContent="center">
             {categories.map(item =>
-              renderItem(item, selectedCategory, ({id}: ICategory) =>
+              renderCategoryItem(item, selectedCategory, ({id}: ICategory) =>
                 setSelectedCategory(id),
               ),
             )}
@@ -181,7 +188,7 @@ const Filter: React.FC<FilterProps> = ({categories, navigation}) => {
                 fontSize="2xl"
                 pb={1}
                 pl={1}
-                color={dateObj.startDate ? '' : 'trueGray.400'}
+                color={dateObj.endDate ? '' : 'trueGray.400'}
                 borderBottomWidth={1}
                 borderBottomColor="gray.300">
                 {dateObj.endDate?.format('YYYY-MM-DD') || '结束时间'}
@@ -200,7 +207,7 @@ const Filter: React.FC<FilterProps> = ({categories, navigation}) => {
               fontSize="2xl"
               pb={1}
               pl={1}
-              color={numberRange[0] ? 'black' : 'trueGray.400'}
+              color={numberRange[0] ? 'dark.100' : 'trueGray.400'}
               borderBottomWidth={1}
               borderBottomColor={
                 numberFocus === 0 ? 'cyan.400' : 'trueGray.300'
@@ -216,7 +223,7 @@ const Filter: React.FC<FilterProps> = ({categories, navigation}) => {
               fontSize="2xl"
               pb={1}
               pl={1}
-              color={numberRange[1] ? 'black' : 'trueGray.400'}
+              color={numberRange[1] ? 'dark.100' : 'trueGray.400'}
               borderBottomWidth={1}
               borderBottomColor={
                 numberFocus === 1 ? 'cyan.400' : 'trueGray.300'
@@ -224,14 +231,16 @@ const Filter: React.FC<FilterProps> = ({categories, navigation}) => {
               {numberRange[1] ? `${numberRange[1]} ¥` : '最大金额'}
             </Text>
           </Flex>
-          <Input
-            size="2xl"
-            mt={2}
-            variant="underlined"
-            width="88%"
-            placeholder="描述"
-            onSubmitEditing={({nativeEvent: {text}}: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => {setDescription(text)}}
-          />
+            <Input
+              size="2xl"
+              mt={2}
+              variant="underlined"
+              width="88%"
+              defaultValue={description}
+              autoFocus={descriptionAutofocus}
+              placeholder="描述"
+              onChange={({nativeEvent: {text}}: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => {setDescription(text)}}
+            />
           <Flex mt={8} direction="row" alignItems="center">
             <Button
               width="40%"
@@ -245,7 +254,7 @@ const Filter: React.FC<FilterProps> = ({categories, navigation}) => {
             </Button>
           </Flex>
         </Flex>
-      </Box>
+      </ScrollView>
       <NumberActionsheet
         isOpen={isOpen}
         onClose={() => {

@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
-import { ListRenderItemInfo, NativeSyntheticEvent, TextInputSubmitEditingEventData } from 'react-native'
+import { ListRenderItemInfo } from 'react-native'
 import {getStatusBarHeight} from 'react-native-iphone-x-helper'
 import Icon from '@/assets/iconfont/index';
 import { connect, ConnectedProps } from 'react-redux';
 import TransactionItem from './transactionItem';
 import { RootState } from '@/models/index';
 import useMount from '@/utils/use-mount';
-import { ITransaction } from '@/models/transaction';
-import { Flex, Text, Box, Input, Center, FlatList, Pressable } from 'native-base';
+import { ICategory, ITransaction } from '@/models/transaction';
+import { Flex, Text, Box, Center, FlatList, Pressable, Button, SmallCloseIcon } from 'native-base';
 import { wp } from '@/utils/index';
 import Dialog from '@/components/Dialog';
 import { RootStackNavigation, RootStackParamList, TransactionPropsType } from '@/navigator/index';
@@ -28,6 +28,28 @@ interface TransactionsProps extends ModelState {
   route: RouteProp<RootStackParamList, 'ButtonTabs'>;
 }
 
+const QueryList = (query: TransactionPropsType, categories: ICategory[], setQuery: React.Dispatch<React.SetStateAction<TransactionPropsType>>) => {
+
+  const renderItem = (label: string, onPress: () => void) => {
+    return (
+      <>
+        <Button onPress={onPress} mr={2} mt={2} _text={{color: "white"}} _pressed={{bg: "indigo.300"}} px={4} py={2} rounded="xl" bg="indigo.400">
+          {label}
+        </Button>
+      </>
+    )
+  }
+
+  const {selectedCategory, dateRange, numberRange} = query
+  return (
+    <Flex direction="row" wrap="wrap" mt={4}>
+      {selectedCategory && renderItem(categories.find(item => item.id === selectedCategory)?.name as string, () => setQuery({...query, selectedCategory: undefined}))}
+      {(dateRange[0] || dateRange[1]) && renderItem(`${dateRange[0] || ''} ~ ${dateRange[1] || ''} `, () => setQuery({...query, dateRange: [undefined, undefined]}))}
+      {(numberRange[0] || numberRange[1]) && renderItem(`${numberRange[0] || '-∞'}￥ ~ ${numberRange[1] || '+∞'}￥ `, () => setQuery({...query, numberRange: [undefined, undefined]}))}
+    </Flex>
+  )
+}
+
 const namespace = 'transaction'
 
 const Transactions: React.FC<TransactionsProps> = ({transactions, categories, dispatch, loading, hasMore, navigation, route}) => {
@@ -38,13 +60,28 @@ const Transactions: React.FC<TransactionsProps> = ({transactions, categories, di
 
   const [deleteId, setDeleteId] = useState("-1")
 
+  const [query, setQuery] = useState<TransactionPropsType>({
+    selectedCategory: undefined,
+    numberRange: [undefined, undefined],
+    dateRange: [undefined, undefined],
+    description: undefined
+  })
+
+  const queryParams = {
+    category: query.selectedCategory,
+    date_$gte: query.dateRange[0],
+    date_$lt: query.dateRange[1],
+    price_$gte: query.numberRange[0],
+    price_$lte: query.numberRange[1],
+    description_like: query.description
+  }
+
   useMount(() => {
     dispatch({type: `${namespace}/fetchTransactions`})
   })
 
-  const queryList: unknown[] = []
-
   useEffect(() => {
+    console.log('route params', route.params)
     if(route && route.params){
       // ???????????????????????????????????????????
       const params = {
@@ -55,6 +92,7 @@ const Transactions: React.FC<TransactionsProps> = ({transactions, categories, di
         price_$lte: (route.params as any).numberRange[1],
         description_like: (route.params as any).description
       }
+      setQuery(route.params as TransactionPropsType)
       dispatch({type: `${namespace}/fetchTransactions`, payload: {params}})
     }
   }, [route.params])
@@ -63,7 +101,7 @@ const Transactions: React.FC<TransactionsProps> = ({transactions, categories, di
     if (!hasMore) {
       return
     }
-    dispatch({type: `${namespace}/fetchTransactions`, payload: { loadMore: true }})
+    dispatch({type: `${namespace}/fetchTransactions`, payload: { loadMore: true, params: queryParams }})
   }
 
   const onRefresh = () => {
@@ -71,7 +109,7 @@ const Transactions: React.FC<TransactionsProps> = ({transactions, categories, di
       return
     }
     setRefresh(true)
-    dispatch({type: `${namespace}/fetchTransactions`, cb: () => {setRefresh(false)}})
+    dispatch({type: `${namespace}/fetchTransactions`, payload: { params: queryParams }, cb: () => {setRefresh(false)}})
   }
 
   const toDetail = (id: string) => {
@@ -91,7 +129,7 @@ const Transactions: React.FC<TransactionsProps> = ({transactions, categories, di
   const renderItem = ({item}: ListRenderItemInfo<ITransaction>) => <TransactionItem transaction={item} onPress={toDetail} onLongPress={openDialog} />
 
   const footer = () => {
-    if (refresh) {
+    if (refresh || transactions.length === 0) {
       return <></>
     }
     if (!hasMore) {
@@ -103,7 +141,7 @@ const Transactions: React.FC<TransactionsProps> = ({transactions, categories, di
     return <></>
   }
 
-  const empty = () =>  (<Center height={200} width="100%"><Text>暂无数据</Text></Center>)
+  const empty = () =>  (<Center height={400} width="100%"><Text>暂无数据</Text></Center>)
 
   const keyExtractor = (item: ITransaction) => item.id as string
 
@@ -122,22 +160,25 @@ const Transactions: React.FC<TransactionsProps> = ({transactions, categories, di
       >
         <Flex direction="row" alignItems="center" justifyContent="space-between">
           <Text bold>所有交易</Text>
-          <Input
+          <Button
             variant="outline"
             width={wp(55)}
             height={10}
-            placeholder="描述"
-            fontSize={12}
-            _light={{
-              placeholderTextColor: "blueGray.400",
-            }}
-            onSubmitEditing={({nativeEvent: {text}}: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => {console.log(text)}}
-          />
-          {/* #2563EB focus on */}
-          <Pressable padding={2} android_ripple={{color: '#7DD3FC'}} onPress={() => navigation.navigate("Filter")}>
+            py={0}
+            px={3}
+            endIcon={query.description ? <SmallCloseIcon color="indigo.400" onPress={() => setQuery({...query, description: undefined})} /> : <></>}
+            _pressed={{bg: "trueGray.50", borderColor: "cyan.400"}}
+            _text={{color: query.description ? "dark.400" : "blueGray.400"}}
+            justifyContent="space-between"
+            onPress={() => navigation.navigate("Filter", {query, descriptionAutofocus: true})}
+          >
+            {query.description || "描述"}
+          </Button>
+          <Pressable padding={2} android_ripple={{color: '#7DD3FC'}} onPress={() => navigation.navigate("Filter", {query})}>
             <Icon name='icon-shaixuan' size={24} />
           </Pressable>
         </Flex>
+        {query && QueryList(query, categories, setQuery)}
       </Box>
       <Dialog
         title={"删除"}
@@ -146,7 +187,6 @@ const Transactions: React.FC<TransactionsProps> = ({transactions, categories, di
         onCancel={() => setShowDeleteDialog(false)}
         onConfirm={deleteTransaction}
       />
-      {/* FlatList重复渲染，导致update很慢 */}
       <FlatList
         ListFooterComponent={footer}
         ListEmptyComponent={empty}

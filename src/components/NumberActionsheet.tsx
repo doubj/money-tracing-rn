@@ -7,41 +7,46 @@ import {
   Stack,
   Text,
 } from 'native-base';
-import React, {Key, useState} from 'react';
+import React, {useState} from 'react';
 import Icon from '@/assets/iconfont/index';
 import { GestureResponderEvent } from 'react-native';
 
-interface NumberActionsheetProps {
-  isOpen: boolean;
-  onClose: () => void;
-  fillNumber: (num: number) => void;
-}
-
-const RenderNumberItem = (
+interface RenderNumberItemProps {
   onPress: null | ((event: GestureResponderEvent) => void),
-  key?: Key,
   label?: string | number,
   content?: React.ReactElement,
-  stylesObj?: {width?: number, height?: number, radius?: string | number, textColor?: string, textSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | number | Array<number> | Array<string> | Record<string, string>, bold?: boolean}
-) => {
+  width?: number,
+  height?: number,
+  buttonRadius?: string | number,
+  textColor?: string,
+  textSize?:'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | number | Array<number> | Array<string> | Record<string, string>,
+  bold?: boolean
+}
+
+const RenderNumberItem: React.FC<RenderNumberItemProps> = (props) => {
+  const {onPress, label, content, width, height, buttonRadius, textColor, textSize, bold} = props
   return (
     <Button
-      key={key}
       _pressed={{bg: 'gray.200'}}
       shadow={1}
       mt={2}
-      width={stylesObj?.width || 70}
-      height={stylesObj?.height || 70}
-      borderRadius={stylesObj?.radius || 70}
+      width={width || 70}
+      height={height || 70}
+      borderRadius={buttonRadius || 70}
       bg="white"
       onPress={onPress}>
-      {content || <Text bold={stylesObj?.bold} fontSize={stylesObj?.textSize || '4xl'} color={stylesObj?.textColor}>{label}</Text>}
+      {content || <Text bold={bold} fontSize={textSize || '4xl'} color={textColor}>{label}</Text>}
     </Button>
   );
 };
 
 const numArr = [7, 8, 9, 4, 5, 6, 3, 2, 1];
 
+interface NumberActionsheetProps {
+  isOpen: boolean;
+  onClose: () => void;
+  fillNumber: (num: number) => void;
+}
 const NumberActionsheet: React.FC<NumberActionsheetProps> = React.memo(
   ({isOpen, onClose, fillNumber}) => {
     const [num, setNum] = useState<string>('');
@@ -79,17 +84,38 @@ const NumberActionsheet: React.FC<NumberActionsheetProps> = React.memo(
                 wrap="wrap"
                 width="69%"
                 justifyContent="space-evenly">
-                {numArr.map(num => RenderNumberItem(() => commonNumberSet(num + ''), num, num))}
-                {RenderNumberItem(() => commonNumberSet('0'), 0, 0, undefined, {width: 140})}
-                {RenderNumberItem(() => commonNumberSet('.'), '.', '.')}
+                {numArr.map(num => <RenderNumberItem onPress={() => commonNumberSet(num + '')} key={num} label={num} />)}
+                <RenderNumberItem
+                  onPress={() => commonNumberSet('0')}
+                  label={0}
+                  width={140}
+                />
+                <RenderNumberItem
+                  onPress={() => commonNumberSet('.')}
+                  label={'.'}
+                />
               </Flex>
               <Flex
                 direction="column"
                 width="23%"
                 justifyContent="space-between">
-                {RenderNumberItem(clear, undefined, 'C', undefined, {textColor: "#60a5fa"})}
-                {RenderNumberItem(deleteLast, undefined, undefined, <Icon name="icon-leftarrow" color="#60a5fa" size={45} />)}
-                {RenderNumberItem(confirm, undefined, '确认', undefined, {height: 140, textSize: 'xl', textColor: "#60a5fa", bold: true})}
+                <RenderNumberItem
+                  onPress={clear}
+                  label={'C'}
+                  textColor={"#60a5fa"}
+                />
+                <RenderNumberItem
+                  onPress={deleteLast}
+                  content={<Icon name="icon-leftarrow" color="#60a5fa" size={45} />}
+                />
+                <RenderNumberItem
+                  onPress={confirm}
+                  label={'确认'}
+                  textColor={"#60a5fa"}
+                  textSize={"xl"}
+                  height={140}
+                  bold
+                />
               </Flex>
             </HStack>
           </Stack>

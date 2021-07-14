@@ -1,6 +1,6 @@
 # 介绍
 
-a simple react-native project for money-tracing
+A simple react-native app for money-tracing
 
 # TODO
 

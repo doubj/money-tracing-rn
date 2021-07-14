@@ -14,20 +14,6 @@ import { RootStackNavigation, RootStackParamList, TransactionPropsType } from '@
 import { RouteProp } from '@react-navigation/native';
 import { useEffect } from 'react';
 
-const connector = connect(({transaction, loading, category} :RootState) => ({
-  categories: category.categories,
-  transactions: transaction.transactions,
-  hasMore: transaction.pagination.hasMore,
-  loading: loading.effects[namespace + '/fetchTransactions']
-}));
-
-type ModelState = ConnectedProps<typeof connector>
-
-interface TransactionsProps extends ModelState {
-  navigation: RootStackNavigation;
-  route: RouteProp<RootStackParamList, 'ButtonTabs'>;
-}
-
 const QueryList = (query: TransactionPropsType, categories: ICategory[], setQuery: React.Dispatch<React.SetStateAction<TransactionPropsType>>) => {
 
   const renderItem = (label: string, onPress: () => void) => {
@@ -42,7 +28,7 @@ const QueryList = (query: TransactionPropsType, categories: ICategory[], setQuer
 
   const {selectedCategory, dateRange, numberRange} = query
   return (
-    <Flex direction="row" wrap="wrap" mt={4}>
+    <Flex direction="row" wrap="wrap">
       {selectedCategory && renderItem(categories.find(item => item.id === selectedCategory)?.name as string, () => setQuery({...query, selectedCategory: undefined}))}
       {(dateRange[0] || dateRange[1]) && renderItem(`${dateRange[0] || ''} ~ ${dateRange[1] || ''} `, () => setQuery({...query, dateRange: [undefined, undefined]}))}
       {(numberRange[0] || numberRange[1]) && renderItem(`${numberRange[0] || '-∞'}￥ ~ ${numberRange[1] || '+∞'}￥ `, () => setQuery({...query, numberRange: [undefined, undefined]}))}
@@ -51,6 +37,20 @@ const QueryList = (query: TransactionPropsType, categories: ICategory[], setQuer
 }
 
 const namespace = 'transaction'
+
+const connector = connect(({transaction, loading, category} :RootState) => ({
+  categories: category.categories,
+  transactions: transaction.transactions,
+  hasMore: transaction.pagination.hasMore,
+  loading: loading.effects[namespace + '/fetchTransactions']
+}));
+
+type ModelState = ConnectedProps<typeof connector>
+
+interface TransactionsProps extends ModelState {
+  navigation: RootStackNavigation;
+  route: RouteProp<RootStackParamList, 'ButtonTabs'>;
+}
 
 const Transactions: React.FC<TransactionsProps> = ({transactions, categories, dispatch, loading, hasMore, navigation, route}) => {
 

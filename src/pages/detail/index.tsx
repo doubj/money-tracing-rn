@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Center, Box } from 'native-base'
 import { connect, ConnectedProps } from 'react-redux';
 import { RootState } from '@/models/index';
@@ -16,11 +16,13 @@ type ModelState = ConnectedProps<typeof connector>
 
 interface TransactionsDetailProps extends ModelState {
   navigation: RootStackNavigation;
-  route: RouteProp<RootStackParamList, 'TransactionDetail'>;
+  route: RouteProp<RootStackParamList, 'Detail'>;
 }
 
 const Detail: React.FC<TransactionsDetailProps> = ({route}) => {
-  console.log(route.params.transaction.id ? "编辑交易记录" : "新增交易记录")
+  useEffect(() => {
+    console.log(route.params?.detail.id ? "编辑交易记录" : "新增交易记录")
+  }, [route])
   return (
     <>
       <Center flex={1}>

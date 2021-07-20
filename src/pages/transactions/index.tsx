@@ -81,7 +81,6 @@ const Transactions: React.FC<TransactionsProps> = ({transactions, categories, di
   })
 
   useEffect(() => {
-    console.log('route params', route.params)
     if(route && route.params){
       // ???????????????????????????????????????????
       const params = {
@@ -113,7 +112,7 @@ const Transactions: React.FC<TransactionsProps> = ({transactions, categories, di
   }
 
   const toDetail = (transaction: ITransaction) => {
-    navigation.navigate("TransactionDetail", {transaction})
+    navigation.navigate("Detail", {detail: transaction, type: 'transaction'})
   }
 
   const openDialog = (id: string) => {
@@ -196,7 +195,7 @@ const Transactions: React.FC<TransactionsProps> = ({transactions, categories, di
         refreshing={refresh}
         onRefresh={onRefresh}
         onEndReached={fetchMore}
-        onEndReachedThreshold={0.2}
+        onEndReachedThreshold={0.1}
       />
     </>
   )

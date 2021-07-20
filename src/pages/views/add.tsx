@@ -26,10 +26,17 @@ const Add: React.FC<AddProps> = ({navigation}) => {
     setShow(!show)
   };
 
+  const toTransactionDetail = () => {
+    togglePopover()
+    navigation.navigate("Detail", {detail: defaultTransaction, type: 'transaction'})
+  }
+
   return (
     <>
       <Popover
         placement="top"
+        isOpen={show}
+        offset={5}
         onOpen={togglePopover}
         onClose={togglePopover}
         trigger={triggerProps => {
@@ -52,7 +59,7 @@ const Add: React.FC<AddProps> = ({navigation}) => {
           <Popover.Body>
             <Stack direction="row" >
               <HStack space={4} alignItems="center">
-                <Pressable onPress={() => navigation.navigate("TransactionDetail", {transaction: defaultTransaction})}>
+                <Pressable onPress={toTransactionDetail}>
                   <VStack alignItems="center">
                     <Icon name="icon-jiaoyi1" color="#4BDDD0" size={35} />
                     <Text fontSize={12} color="darkText">添加记录</Text>

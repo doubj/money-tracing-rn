@@ -112,8 +112,8 @@ const Transactions: React.FC<TransactionsProps> = ({transactions, categories, di
     dispatch({type: `${namespace}/fetchTransactions`, payload: { params: queryParams }, cb: () => {setRefresh(false)}})
   }
 
-  const toDetail = (id: string) => {
-    console.log('press')
+  const toDetail = (transaction: ITransaction) => {
+    navigation.navigate("TransactionDetail", {transaction})
   }
 
   const openDialog = (id: string) => {

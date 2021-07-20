@@ -3,6 +3,7 @@ import { Reducer } from 'redux';
 import axios from 'axios'
 import { IconNames } from '@/assets/iconfont';
 import { RootState } from '.';
+import dayjs from 'dayjs'
 
 const TRANSACTION_URL = '/record'
 
@@ -14,6 +15,14 @@ export interface ITransaction {
   description: string;
   category: ICategory;
 };
+
+export const defaultTransaction: ITransaction = {
+  date: dayjs().format("YYYY-MM-DD"),
+  timestamp: dayjs().valueOf(),
+  price: 0,
+  description: "",
+  category: {id: "", name: "", icon: "icon-food", type: "expense"}
+}
 
 export interface ICategory {
   id: string;
@@ -49,7 +58,7 @@ const initialState: TransactionState = {
   transactions: [],
   pagination: {
     _page: 1,
-    _limit: 10,
+    _limit: 20,
     total: 0,
     hasMore: true
   }

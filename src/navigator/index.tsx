@@ -4,6 +4,8 @@ import { Platform, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import ButtonTabs from './buttonTabs';
 import Filter from '@/pages/filter';
+import Detail from '@/pages/TransactionDetail';
+import { ITransaction } from '@/models/transaction';
 
 export type TransactionPropsType = {
   selectedCategory: string | undefined,
@@ -21,6 +23,9 @@ export type RootStackParamList = {
     query: TransactionPropsType,
     descriptionAutofocus?: boolean
   },
+  TransactionDetail: {
+    transaction: ITransaction;
+  };
 }
 
 export type RootStackNavigation = StackNavigationProp<RootStackParamList>;
@@ -49,6 +54,7 @@ export default () => {
           }}>
           <Stack.Screen options={{headerTitle: '首页', headerShown: false}} name="ButtonTabs" component={ButtonTabs} />
           <Stack.Screen options={{headerTitle: '筛选', headerShown: true}} name="Filter" component={Filter} />
+          <Stack.Screen options={{headerTitle: '详情', headerShown: false}} name="TransactionDetail" component={Detail} />
         </Stack.Navigator>
       </NavigationContainer>
   )

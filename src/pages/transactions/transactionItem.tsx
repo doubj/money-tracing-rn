@@ -6,7 +6,7 @@ import { ITransaction } from '@/models/transaction';
 
 interface TransactionItemProps {
   transaction: ITransaction,
-  onPress: (id: string) => void,
+  onPress: (transaction: ITransaction) => void,
   onLongPress: (id: string) => void
 }
 
@@ -17,7 +17,7 @@ const TransactionItem: React.FC<TransactionItemProps> = React.memo(({transaction
 
   return (
     <>
-      <Pressable android_ripple={{color: '#7DD3FC'}} style={styles.transactionWrapper} onLongPress={() => onLongPress(id as string)} onPress={() => onPress(id as string)} >
+      <Pressable android_ripple={{color: '#7DD3FC'}} style={styles.transactionWrapper} onLongPress={() => onLongPress(id as string)} onPress={() => onPress(transaction)} >
         <View style={styles.icon}>
           <Icon name={category.icon} size={38} />
         </View>
@@ -36,13 +36,12 @@ const TransactionItem: React.FC<TransactionItemProps> = React.memo(({transaction
 
 const styles = StyleSheet.create({
   transactionWrapper: {
-    width: wp(95),
-    marginTop: 20,
-    marginLeft: wp(2.5),
+    width: wp(98),
+    marginTop: 5,
+    marginLeft: wp(1),
     height: 60,
     backgroundColor: '#fff',
     borderRadius: 10,
-    elevation: 10,
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',

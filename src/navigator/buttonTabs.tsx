@@ -6,10 +6,12 @@ import Account from '@/pages/account';
 import Icon, { IconNames } from '@/assets/iconfont/index';
 import Transactions from '@/pages/transactions';
 import { TransactionPropsType } from '.';
+import Add from '@/pages/views/add';
 
 export type BottomTabParamList = {
   Home: undefined,
   Transactions: TransactionPropsType,
+  Add: undefined,
   Templates: undefined,
   Account: undefined,
 }
@@ -50,6 +52,17 @@ export default function buttonTabsNavigator() {
             tabBarLabel: "交易",
             tabBarIcon: props => tabIconRender('icon-jiaoyi', props)
           }}
+        />
+        <Tab.Screen
+          name="Add"
+          component={Add}
+          options={({navigation}) => ({
+            tabBarButton: () => {
+              return (
+              <Add navigation={navigation} />
+              )
+            }
+          })}
         />
         <Tab.Screen
           name="Templates"

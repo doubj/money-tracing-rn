@@ -3,7 +3,8 @@ import Config from 'react-native-config';
 
 const errorMsg = '请求出错啦，请稍后再试！';
 
-axios.defaults.baseURL = Config.API_URL;
+// axios.defaults.baseURL = Config.API_URL;
+axios.defaults.baseURL = "http://192.168.0.109:3005/api/v1";
 axios.defaults.timeout = 3000
 
 axios.interceptors.request.use(

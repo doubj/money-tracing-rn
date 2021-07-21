@@ -48,7 +48,10 @@ interface TransactionModel extends Model {
     setState: Reducer<TransactionState>
   },
   effects: {
-    fetchTransactions: Effect
+    fetchTransactions: Effect,
+    createTransaction: Effect,
+    updateTransaction: Effect,
+    deleteTransaction: Effect
   }
 }
 
@@ -105,7 +108,23 @@ const transactionModel: TransactionModel = {
       if (typeof cb === 'function') {
         cb()
       }
-    }
+    },
+    *createTransaction({payload, success, fail}, {call}) {
+      const result = yield call(axios.post, TRANSACTION_URL, payload)
+      if (result) {
+        success()
+      } else {
+        fail()
+      }
+    },
+    *updateTransaction({payload, success}, {call}) {
+      yield call(axios.put, `${TRANSACTION_URL}/${payload.id}`, payload)
+      success()
+    },
+    *deleteTransaction({payload, success}, {call}) {
+      yield call(axios.delete, `${TRANSACTION_URL}/${payload.id}`)
+      success()
+    },
   }
 }
 

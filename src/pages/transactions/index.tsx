@@ -13,6 +13,7 @@ import Dialog from '@/components/Dialog';
 import { RootStackNavigation, RootStackParamList, TransactionPropsType } from '@/navigator/index';
 import { RouteProp } from '@react-navigation/native';
 import { useEffect } from 'react';
+import useMessage from '@/utils/use-message';
 
 const QueryList = (query: TransactionPropsType, categories: ICategory[], setQuery: React.Dispatch<React.SetStateAction<TransactionPropsType>>) => {
 
@@ -59,6 +60,8 @@ const Transactions: React.FC<TransactionsProps> = ({transactions, categories, di
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const [deleteId, setDeleteId] = useState("-1")
+
+  const {success} = useMessage()
 
   const [query, setQuery] = useState<TransactionPropsType>({
     selectedCategory: undefined,
@@ -121,8 +124,16 @@ const Transactions: React.FC<TransactionsProps> = ({transactions, categories, di
   }
 
   const deleteTransaction = () => {
-    console.log('delete transaction id is ' + deleteId)
+    // TODO删除完后跳转card navigation会有bug
     setShowDeleteDialog(false)
+    dispatch({
+      type: `${namespace}/deleteTransaction`,
+      payload: {id: deleteId},
+      success: () => {
+        success("删除成功")
+        onRefresh()
+      }
+    });
   }
 
   const renderItem = ({item}: ListRenderItemInfo<ITransaction>) => <TransactionItem transaction={item} onPress={toDetail} onLongPress={openDialog} />

@@ -1,10 +1,7 @@
 import React, {useState} from 'react';
 import {
-  Center,
-  Box,
   Text,
   Flex,
-  Pressable,
   Input,
   Button,
   useDisclose,
@@ -14,7 +11,6 @@ import {
 import {RootState} from '@/models/index';
 import {connect, ConnectedProps} from 'react-redux';
 import {RootStackNavigation, RootStackParamList} from '@/navigator/index';
-import Icon from '@/assets/iconfont/index';
 import {ICategory} from '@/models/transaction';
 import DateRangePicker from 'react-native-daterange-picker';
 import moment from 'moment';
@@ -23,6 +19,8 @@ import { NativeSyntheticEvent, TextInputSubmitEditingEventData } from 'react-nat
 import { RouteProp } from '@react-navigation/native';
 import { hp } from '@/utils/index';
 import {useHeaderHeight} from '@react-navigation/stack';
+import CategoryList from '@/components/CategoryList';
+import useMessage from '@/utils/use-message';
 
 const connector = connect(({category}: RootState) => ({
   categories: category.categories,
@@ -35,40 +33,12 @@ interface FilterProps extends ModelState {
   route: RouteProp<RootStackParamList, 'Filter'>;
 }
 
-const renderCategoryItem = (
-  category: ICategory,
-  selectedId: string | undefined,
-  onPress: (selectedCategory: ICategory) => void,
-) => {
-  return (
-    <Pressable
-      android_ripple={{color: '#14b8a6'}}
-      key={category.id}
-      onPress={() => onPress(category)}>
-      <Box
-        p={1}
-        border={1}
-        borderColor="teal.500"
-        borderRadius="xl"
-        size={20}
-        bg={selectedId === category.id ? 'teal.400' : ''}>
-        <Center flex={1}>
-          <Icon name={category.icon} size={20} />
-          <Text color="darkText" noOfLines={1}>
-            {category.name}
-          </Text>
-        </Center>
-      </Box>
-    </Pressable>
-  );
-};
-
 const Filter: React.FC<FilterProps> = ({categories, navigation, route}) => {
   const {isOpen, onOpen, onClose} = useDisclose();
 
   const headerHeight = useHeaderHeight()
 
-  const toast = useToast();
+  const {message} = useMessage();
 
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(route.params.query.selectedCategory);
 
@@ -131,10 +101,7 @@ const Filter: React.FC<FilterProps> = ({categories, navigation, route}) => {
       ]);
     } else if (numberFocus === 1) {
       if (numberRange[0] && num < numberRange[0]) {
-        toast.show({
-          title: `请输入比${numberRange[0]}￥大的金额`,
-          placement: 'top',
-        });
+        message(`请输入比${numberRange[0]}￥大的金额`)
       } else {
         setNumberRange([numberRange[0], num]);
       }
@@ -146,19 +113,7 @@ const Filter: React.FC<FilterProps> = ({categories, navigation, route}) => {
     <>
       <ScrollView flex={1} bg="white">
         <Flex minHeight={hp(100) - headerHeight} direction="column" alignItems="center">
-          <Flex
-            mt={4}
-            w="100%"
-            direction="row"
-            wrap="wrap"
-            alignItems="center"
-            justifyContent="center">
-            {categories.map(item =>
-              renderCategoryItem(item, selectedCategory, ({id}: ICategory) =>
-                setSelectedCategory(id),
-              ),
-            )}
-          </Flex>
+          <CategoryList categories={categories} selectedCategory={selectedCategory} onSelect={({id}: ICategory) => setSelectedCategory(id)} />
           <DateRangePicker
             onChange={(datas: any) => {
               setDateObj({...dateObj, ...datas});

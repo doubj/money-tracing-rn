@@ -5,6 +5,7 @@ import {
   HStack,
   Input,
   ScrollView,
+  Text,
   TextArea,
   VStack,
 } from 'native-base';
@@ -14,12 +15,14 @@ import {RootStackNavigation, RootStackParamList} from '@/navigator/index';
 import {RouteProp} from '@react-navigation/native';
 import CategoryList from '@/components/CategoryList';
 import {
-  defaultTransaction,
   ICategory,
-  ITransaction,
 } from '@/models/transaction';
 import useMessage from '@/utils/use-message';
-import dayjs from 'dayjs'
+import dayjs from 'dayjs';
+import DateRangePicker from 'react-native-daterange-picker';
+import moment from 'moment';
+import {hp} from '@/utils/index';
+import {useHeaderHeight} from '@react-navigation/stack';
 
 const namespace = 'transaction';
 
@@ -41,25 +44,25 @@ const Detail: React.FC<TransactionsDetailProps> = ({
   navigation,
   dispatch,
 }) => {
-  const [detail, setDetail] = useState<any>(defaultTransaction);
+  const routeDetail = route.params.detail
+  const [detail, setDetail] = useState<any>(routeDetail);
+  const headerHeight = useHeaderHeight();
 
-  const {message, success, error} = useMessage()
+  const [dateObj, setDateObj] = useState<{
+    date: moment.Moment;
+    displayedDate: moment.Moment;
+  }>({date: moment(routeDetail.date), displayedDate: moment()});
 
-  useEffect(() => {
-    if (detail && !detail.id) {
-      delete detail.category;
-    }
-    setDetail(route.params?.detail);
-  }, [route]);
+  const {message, success, error} = useMessage();
 
   const saveDetail = () => {
     if (requiredCheck()) {
       return;
     }
     if (detail.id) {
-      updateDetail()
+      updateDetail();
     } else {
-      createDetail()
+      createDetail();
     }
   };
 
@@ -68,24 +71,24 @@ const Detail: React.FC<TransactionsDetailProps> = ({
       type: `${namespace}/updateTransaction`,
       payload: detail,
       success: () => {
-        success("更新成功")
-      }
+        success('更新成功');
+      },
     });
-  }
+  };
 
   const createDetail = () => {
     dispatch({
       type: `${namespace}/createTransaction`,
       payload: {...detail, timestamp: dayjs().valueOf()},
       success: () => {
-        success("添加成功")
-        navigation.goBack()
+        success('添加成功');
+        navigation.goBack();
       },
       fail: () => {
-        error("添加失败")
-      }
+        error('添加失败');
+      },
     });
-  }
+  };
 
   const requiredCheck = () => {
     const quiredProperties = ['category', 'price', 'date', 'description'];
@@ -97,7 +100,7 @@ const Detail: React.FC<TransactionsDetailProps> = ({
     ];
     const result = quiredProperties.some((key, idx) => {
       if (!detail[key]) {
-        message(errorMsg[idx])
+        message(errorMsg[idx]);
         return true;
       }
       return false;
@@ -110,15 +113,15 @@ const Detail: React.FC<TransactionsDetailProps> = ({
       type: `${namespace}/deleteTransaction`,
       payload: detail,
       success: () => {
-        success("删除成功")
-        navigation.goBack()
-      }
+        success('删除成功');
+        navigation.goBack();
+      },
     });
   };
 
   return (
     <ScrollView flex={1} bg="white">
-      <VStack space={4} px={4} pb={4}>
+      <VStack space={4} px={4} pb={4} minHeight={hp(100) - headerHeight}>
         <CategoryList
           categories={categories}
           selectedCategory={detail.category?.id}
@@ -138,13 +141,32 @@ const Detail: React.FC<TransactionsDetailProps> = ({
             keyboardType="numeric"
           />
         </FormControl>
-        <FormControl>
-          <FormControl.Label
-            _text={{color: 'muted.700', fontSize: 'xl', fontWeight: 600}}>
-            时间
-          </FormControl.Label>
-          <Input defaultValue={detail.date} />
-        </FormControl>
+        <DateRangePicker
+          onChange={(datas: any) => {
+            setDateObj({...dateObj, ...datas});
+            if (datas.date){
+              setDetail({...detail, date: datas.date.format("YYYY-MM-DD")})
+            }
+          }}
+          {...dateObj}>
+          <FormControl>
+            <FormControl.Label
+              _text={{color: 'muted.700', fontSize: 'xl', fontWeight: 600}}>
+              时间
+            </FormControl.Label>
+            <Text
+              width="100%"
+              fontSize="md"
+              py={4}
+              pl={3}
+              rounded="md"
+              color="black"
+              borderWidth={1}
+              borderColor="gray.300">
+              {dateObj.date.format('YYYY-MM-DD')}
+            </Text>
+          </FormControl>
+        </DateRangePicker>
         <FormControl>
           <FormControl.Label
             _text={{color: 'muted.700', fontSize: 'xl', fontWeight: 600}}>
@@ -156,22 +178,24 @@ const Detail: React.FC<TransactionsDetailProps> = ({
               setDetail({...detail, description});
             }}
             h={20}
-            placeholder="消费相关信息"
+            placeholder="相关描述信息"
           />
         </FormControl>
         <HStack justifyContent="center">
           <Button width="40%" borderRadius={20} onPress={saveDetail}>
-            {detail.id ? "更新" : "添加"}
+            {detail.id ? '更新' : '添加'}
           </Button>
-          {detail.id && <Button
-            colorScheme="red"
-            _text={{color: 'white'}}
-            width="40%"
-            borderRadius={20}
-            ml={4}
-            onPress={deleteDetail}>
-            删除
-          </Button>}
+          {detail.id && (
+            <Button
+              colorScheme="red"
+              _text={{color: 'white'}}
+              width="40%"
+              borderRadius={20}
+              ml={4}
+              onPress={deleteDetail}>
+              删除
+            </Button>
+          )}
         </HStack>
       </VStack>
     </ScrollView>

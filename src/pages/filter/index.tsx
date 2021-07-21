@@ -112,7 +112,7 @@ const Filter: React.FC<FilterProps> = ({categories, navigation, route}) => {
   return (
     <>
       <ScrollView flex={1} bg="white">
-        <Flex minHeight={hp(100) - headerHeight} direction="column" alignItems="center">
+        <Flex minHeight={hp(100) - headerHeight + 30} direction="column" alignItems="center">
           <CategoryList categories={categories} selectedCategory={selectedCategory} onSelect={({id}: ICategory) => setSelectedCategory(id)} />
           <DateRangePicker
             onChange={(datas: any) => {

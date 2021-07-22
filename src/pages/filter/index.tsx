@@ -5,12 +5,11 @@ import {
   Input,
   Button,
   useDisclose,
-  useToast,
   ScrollView,
 } from 'native-base';
 import {RootState} from '@/models/index';
 import {connect, ConnectedProps} from 'react-redux';
-import {RootStackNavigation, RootStackParamList} from '@/navigator/index';
+import { RootStackParamList} from '@/navigator/index';
 import {ICategory} from '@/models/transaction';
 import DateRangePicker from 'react-native-daterange-picker';
 import moment from 'moment';
@@ -21,6 +20,7 @@ import { hp } from '@/utils/index';
 import {useHeaderHeight} from '@react-navigation/stack';
 import CategoryList from '@/components/CategoryList';
 import useMessage from '@/utils/use-message';
+import { BottomTabNavigation } from '@/navigator/buttonTabs';
 
 const connector = connect(({category}: RootState) => ({
   categories: category.categories,
@@ -29,7 +29,7 @@ const connector = connect(({category}: RootState) => ({
 type ModelState = ConnectedProps<typeof connector>;
 
 interface FilterProps extends ModelState {
-  navigation: RootStackNavigation;
+  navigation: BottomTabNavigation;
   route: RouteProp<RootStackParamList, 'Filter'>;
 }
 
@@ -73,9 +73,9 @@ const Filter: React.FC<FilterProps> = ({categories, navigation, route}) => {
       dateObj.startDate && dateObj.startDate.format('YYYY-MM-DD'),
       dateObj.endDate && dateObj.endDate.format('YYYY-MM-DD'),
     ];
-    navigation.navigate('ButtonTabs', {
-      screen: 'Transactions',
-      params: {selectedCategory, dateRange, numberRange, description},
+    navigation.navigate('Transactions', {
+      query: {selectedCategory, dateRange, numberRange, description},
+      reFresh: true
     });
   };
 

@@ -7,14 +7,20 @@ import Icon, { IconNames } from '@/assets/iconfont/index';
 import Transactions from '@/pages/transactions';
 import { TransactionPropsType } from '.';
 import Add from '@/pages/views/add';
+import { StackNavigationProp } from '@react-navigation/stack';
 
 export type BottomTabParamList = {
   Home: undefined,
-  Transactions: TransactionPropsType,
+  Transactions: {
+    query?: TransactionPropsType,
+    reFresh?: boolean
+  },
   Add: undefined,
   Templates: undefined,
   Account: undefined,
 }
+
+export type BottomTabNavigation = StackNavigationProp<BottomTabParamList>;
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 

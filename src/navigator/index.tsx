@@ -15,10 +15,7 @@ export type TransactionPropsType = {
 }
 
 export type RootStackParamList = {
-  ButtonTabs: {
-    screen?: string;
-    params?: TransactionPropsType;
-  },
+  ButtonTabs: undefined,
   Filter: {
     query: TransactionPropsType,
     descriptionAutofocus?: boolean

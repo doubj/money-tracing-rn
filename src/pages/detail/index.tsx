@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
   Button,
   FormControl,
@@ -11,7 +11,7 @@ import {
 } from 'native-base';
 import {connect, ConnectedProps} from 'react-redux';
 import {RootState} from '@/models/index';
-import {RootStackNavigation, RootStackParamList} from '@/navigator/index';
+import { RootStackParamList} from '@/navigator/index';
 import {RouteProp} from '@react-navigation/native';
 import CategoryList from '@/components/CategoryList';
 import {
@@ -23,6 +23,7 @@ import DateRangePicker from 'react-native-daterange-picker';
 import moment from 'moment';
 import {hp} from '@/utils/index';
 import {useHeaderHeight} from '@react-navigation/stack';
+import { BottomTabNavigation } from '@/navigator/buttonTabs';
 
 const namespace = 'transaction';
 
@@ -34,7 +35,7 @@ const connector = connect(({transaction, category}: RootState) => ({
 type ModelState = ConnectedProps<typeof connector>;
 
 interface TransactionsDetailProps extends ModelState {
-  navigation: RootStackNavigation;
+  navigation: BottomTabNavigation;
   route: RouteProp<RootStackParamList, 'Detail'>;
 }
 
@@ -82,7 +83,7 @@ const Detail: React.FC<TransactionsDetailProps> = ({
       payload: {...detail, timestamp: dayjs().valueOf()},
       success: () => {
         success('添加成功');
-        navigation.goBack();
+        navigation.navigate('Transactions', {reFresh: true});
       },
       fail: () => {
         error('添加失败');
@@ -114,7 +115,7 @@ const Detail: React.FC<TransactionsDetailProps> = ({
       payload: detail,
       success: () => {
         success('删除成功');
-        navigation.goBack();
+        navigation.navigate('Transactions', {reFresh: true});
       },
     });
   };

@@ -10,10 +10,11 @@ import { ICategory, ITransaction } from '@/models/transaction';
 import { Flex, Text, Box, Center, FlatList, Pressable, Button, SmallCloseIcon } from 'native-base';
 import { wp } from '@/utils/index';
 import Dialog from '@/components/Dialog';
-import { RootStackNavigation, RootStackParamList, TransactionPropsType } from '@/navigator/index';
+import { RootStackNavigation, TransactionPropsType } from '@/navigator/index';
 import { RouteProp } from '@react-navigation/native';
 import { useEffect } from 'react';
 import useMessage from '@/utils/use-message';
+import { BottomTabParamList } from '@/navigator/buttonTabs';
 
 const QueryList = (query: TransactionPropsType, categories: ICategory[], setQuery: React.Dispatch<React.SetStateAction<TransactionPropsType>>) => {
 
@@ -50,7 +51,7 @@ type ModelState = ConnectedProps<typeof connector>
 
 interface TransactionsProps extends ModelState {
   navigation: RootStackNavigation;
-  route: RouteProp<RootStackParamList, 'ButtonTabs'>;
+  route: RouteProp<BottomTabParamList, 'Transactions'>;
 }
 
 const Transactions: React.FC<TransactionsProps> = ({transactions, categories, dispatch, loading, hasMore, navigation, route}) => {
@@ -84,18 +85,21 @@ const Transactions: React.FC<TransactionsProps> = ({transactions, categories, di
   })
 
   useEffect(() => {
-    if(route && route.params){
-      // ???????????????????????????????????????????
+    if(route && route.params && route.params.query){
       const params = {
-        category: (route.params as any).selectedCategory,
-        date_$gte: (route.params as any).dateRange[0],
-        date_$lt: (route.params as any).dateRange[1],
-        price_$gte: (route.params as any).numberRange[0],
-        price_$lte: (route.params as any).numberRange[1],
-        description_like: (route.params as any).description
+        category: route.params.query.selectedCategory,
+        date_$gte: route.params.query.dateRange[0],
+        date_$lt: route.params.query.dateRange[1],
+        price_$gte: route.params.query.numberRange[0],
+        price_$lte: route.params.query.numberRange[1],
+        description_like: route.params.query.description
       }
-      setQuery(route.params as TransactionPropsType)
-      dispatch({type: `${namespace}/fetchTransactions`, payload: {params}})
+      setQuery(route.params.query)
+      if (route.params.reFresh) {
+        dispatch({type: `${namespace}/fetchTransactions`, payload: { params }})
+      }
+    } else if (route.params?.reFresh) {
+      onRefresh()
     }
   }, [route.params])
 

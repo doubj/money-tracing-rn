@@ -55,8 +55,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   left: {
-    paddingHorizontal: 10,
-    width: '60%',
+    paddingRight: 10,
+    width: '50%',
   },
   right: {
     display: 'flex',
@@ -75,10 +75,10 @@ const styles = StyleSheet.create({
     color: '#737373'
   },
   expense: {
-    color: '#DC2626'
+    color: '#f87171'
   },
   income: {
-    color: '#22C55E'
+    color: '#4ade80'
   }
 })
 

@@ -10,4 +10,12 @@ function hp(percent: number) {
   return Math.round((percent * viewportHeight) /100)
 }
 
-export { viewportWidth, viewportHeight, wp, hp }
+function numberTransfer(number: number) {
+  let result = number
+  if ((number + "").indexOf(".") !== -1){
+    result = +result.toFixed(2)
+  }
+  return result
+}
+
+export { viewportWidth, viewportHeight, wp, hp, numberTransfer}

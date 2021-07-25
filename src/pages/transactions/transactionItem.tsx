@@ -59,6 +59,7 @@ const styles = StyleSheet.create({
     width: '50%',
   },
   right: {
+    width: "35%",
     display: 'flex',
     alignItems: 'flex-end'
   },

@@ -38,16 +38,16 @@ const renderItem = (item: ITransaction) => {
       alignItems="center"
       key={item.id}
       flexDirection="row">
-      <Center>
+      <Center width="10%">
         <Icon name={category.icon} size={24} />
       </Center>
-      <VStack width="65%">
+      <VStack width="50%">
         <Text bold>{category.name}</Text>
         <Text fontSize="sm" color="#737373" noOfLines={1}>
           {description}
         </Text>
       </VStack>
-      <VStack alignItems="flex-end">
+      <VStack width="40%" alignItems="flex-end">
         <Text
           color={category.type === 'expense' ? 'red.400' : 'green.400'}
           bold>

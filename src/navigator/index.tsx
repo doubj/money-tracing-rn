@@ -6,6 +6,8 @@ import ButtonTabs from './buttonTabs';
 import Filter from '@/pages/filter';
 import Detail from '@/pages/detail';
 import { ITransaction } from '@/models/transaction';
+import useMount from '@/utils/use-mount';
+import SplashScreen from 'react-native-splash-screen';
 
 export type TransactionPropsType = {
   selectedCategory: string | undefined,
@@ -31,6 +33,11 @@ export type RootStackNavigation = StackNavigationProp<RootStackParamList>;
 const Stack = createStackNavigator<RootStackParamList>();
 
 export default () => {
+
+  useMount(() => {
+    SplashScreen.hide()
+  })
+
   return (
       <NavigationContainer>
         <Stack.Navigator

@@ -1,3 +1,5 @@
+import { NavigationContainerRef, NavigationState } from '@react-navigation/native'
+import React from 'react'
 import {Dimensions} from 'react-native'
 
 const {width: viewportWidth, height: viewportHeight} = Dimensions.get('window')
@@ -18,4 +20,10 @@ function numberTransfer(number: number) {
   return result
 }
 
-export { viewportWidth, viewportHeight, wp, hp, numberTransfer}
+const navigationRef = React.createRef<NavigationContainerRef>();
+
+function navigate(name: string, params?: any) {
+  navigationRef.current?.navigate(name, params);
+}
+
+export { viewportWidth, viewportHeight, wp, hp, numberTransfer, navigationRef, navigate}

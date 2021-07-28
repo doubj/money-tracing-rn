@@ -13,6 +13,7 @@ import React, { useState } from 'react';
 import { IUser } from '@/models/user';
 import { NativeSyntheticEvent, TextInputSubmitEditingEventData } from 'react-native';
 import { connect, ConnectedProps } from 'react-redux';
+import useMount from '@/utils/use-mount';
 
 const namespace = 'user'
 
@@ -24,6 +25,10 @@ type ModelState = ConnectedProps<typeof connector>;
 interface LoginProps extends ModelState {}
 
 const Login: React.FC<LoginProps> = ({dispatch}) => {
+
+  useMount(() => {
+    dispatch({type: `${namespace}/checkLogin`})
+  })
 
   const [user, setUser] = useState<IUser>({userName: '', password: ''})
 

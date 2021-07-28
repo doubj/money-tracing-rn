@@ -1,3 +1,4 @@
+import storage, { load } from "@/config/storage";
 import axios from "axios";
 import { Effect, Model } from "dva-core-ts";
 import { Reducer } from 'redux';
@@ -19,7 +20,8 @@ interface UserModel extends Model {
     setState: Reducer<UserState>
   },
   effects: {
-    login: Effect
+    login: Effect,
+    checkLogin: Effect
   }
 }
 
@@ -43,6 +45,7 @@ const userModel: UserModel = {
   },
   effects: {
     *login({payload}, {call, put}) {
+      console.log(payload)
       const result = yield call(axios.post, "/user/login", payload)
       axios.interceptors.request.use(
         config => {
@@ -53,7 +56,17 @@ const userModel: UserModel = {
           return Promise.reject(error)
         }
       )
+      storage.save({key: "user", data: payload})
       navigate("ButtonTabs")
+    },
+    *checkLogin(_, {call, put}) {
+      const user = yield call(load, {key: 'user'});
+      if(user) {
+        yield put({
+          type: 'login',
+          payload: user
+        })
+      }
     }
   }
 }

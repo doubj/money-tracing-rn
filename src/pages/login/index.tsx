@@ -10,7 +10,6 @@ import {
 } from 'native-base';
 import {getStatusBarHeight} from 'react-native-iphone-x-helper'
 import React, { useState } from 'react';
-import { IUser } from '@/models/user';
 import { NativeSyntheticEvent, TextInputSubmitEditingEventData } from 'react-native';
 import { connect, ConnectedProps } from 'react-redux';
 import useMount from '@/utils/use-mount';
@@ -30,7 +29,7 @@ const Login: React.FC<LoginProps> = ({dispatch}) => {
     dispatch({type: `${namespace}/checkLogin`})
   })
 
-  const [user, setUser] = useState<IUser>({userName: '', password: ''})
+  const [user, setUser] = useState<{userName: string, password: string}>({userName: '', password: ''})
 
   const login = () => {
     dispatch({type: `${namespace}/login`, payload: user})
@@ -45,7 +44,6 @@ const Login: React.FC<LoginProps> = ({dispatch}) => {
         <Heading color="muted.400" size="xs">
           {"powered by doubj:)"}
         </Heading>
-
         <VStack space={2} mt={5}>
           <FormControl>
             <FormControl.Label

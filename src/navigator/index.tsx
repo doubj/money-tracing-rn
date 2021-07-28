@@ -15,6 +15,7 @@ import useMount from '@/utils/use-mount';
 import SplashScreen from 'react-native-splash-screen';
 import Login from '@/pages/login';
 import {navigationRef} from '../utils';
+import { ITemplate } from '@/models/template';
 
 export type TransactionPropsType = {
   selectedCategory: string | undefined;
@@ -31,7 +32,7 @@ export type RootStackParamList = {
     descriptionAutofocus?: boolean;
   };
   Detail: {
-    detail: ITransaction;
+    detail: ITransaction | ITemplate;
     type: 'transaction' | 'template';
   };
 };

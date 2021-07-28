@@ -11,21 +11,17 @@ import {
 } from 'native-base';
 import {connect, ConnectedProps} from 'react-redux';
 import {RootState} from '@/models/index';
-import { RootStackParamList} from '@/navigator/index';
+import {RootStackParamList} from '@/navigator/index';
 import {RouteProp} from '@react-navigation/native';
 import CategoryList from '@/components/CategoryList';
-import {
-  ICategory,
-} from '@/models/transaction';
+import {ICategory} from '@/models/transaction';
 import useMessage from '@/utils/use-message';
 import dayjs from 'dayjs';
 import DateRangePicker from 'react-native-daterange-picker';
 import moment from 'moment';
 import {hp} from '@/utils/index';
 import {useHeaderHeight} from '@react-navigation/stack';
-import { BottomTabNavigation } from '@/navigator/buttonTabs';
-
-const namespace = 'transaction';
+import {BottomTabNavigation} from '@/navigator/buttonTabs';
 
 const connector = connect(({transaction, category}: RootState) => ({
   categories: category.categories,
@@ -45,7 +41,8 @@ const Detail: React.FC<TransactionsDetailProps> = ({
   navigation,
   dispatch,
 }) => {
-  const routeDetail = route.params.detail
+  const detailType = route.params.type;
+  const routeDetail = route.params.detail;
   const [detail, setDetail] = useState<any>(routeDetail);
   const headerHeight = useHeaderHeight();
 
@@ -69,7 +66,7 @@ const Detail: React.FC<TransactionsDetailProps> = ({
 
   const updateDetail = () => {
     dispatch({
-      type: `${namespace}/updateTransaction`,
+      type: detailType === 'transaction' ? "transaction/updateTransaction" : "template/updateTemplate",
       payload: detail,
       success: () => {
         success('更新成功');
@@ -79,11 +76,11 @@ const Detail: React.FC<TransactionsDetailProps> = ({
 
   const createDetail = () => {
     dispatch({
-      type: `${namespace}/createTransaction`,
+      type: detailType === 'transaction' ? "transaction/createTransaction" : "template/createTemplate",
       payload: {...detail, timestamp: dayjs().valueOf()},
       success: () => {
         success('添加成功');
-        navigation.navigate('Transactions', {reFresh: true});
+        navigation.navigate(detailType === 'transaction' ? 'Transactions' : 'Templates', {reFresh: true});
       },
       fail: () => {
         error('添加失败');
@@ -111,11 +108,11 @@ const Detail: React.FC<TransactionsDetailProps> = ({
 
   const deleteDetail = () => {
     dispatch({
-      type: `${namespace}/deleteTransaction`,
+      type: detailType === 'transaction' ? "transaction/deleteTransaction" : "template/deleteTemplate",
       payload: detail,
       success: () => {
         success('删除成功');
-        navigation.navigate('Transactions', {reFresh: true});
+        navigation.navigate(detailType === 'transaction' ? 'Transactions' : 'Templates', {reFresh: true});
       },
     });
   };
@@ -145,8 +142,8 @@ const Detail: React.FC<TransactionsDetailProps> = ({
         <DateRangePicker
           onChange={(datas: any) => {
             setDateObj({...dateObj, ...datas});
-            if (datas.date){
-              setDetail({...detail, date: datas.date.format("YYYY-MM-DD")})
+            if (datas.date) {
+              setDetail({...detail, date: datas.date.format('YYYY-MM-DD')});
             }
           }}
           {...dateObj}>
@@ -182,6 +179,22 @@ const Detail: React.FC<TransactionsDetailProps> = ({
             placeholder="相关描述信息"
           />
         </FormControl>
+        {detailType === 'template' && (
+          <FormControl>
+            <FormControl.Label
+              _text={{color: 'muted.700', fontSize: 'xl', fontWeight: 600}}>
+              备注
+            </FormControl.Label>
+            <TextArea
+              defaultValue={detail.remark}
+              onChange={({nativeEvent: {text: remark}}) => {
+                setDetail({...detail, remark});
+              }}
+              h={20}
+              placeholder="备注信息"
+            />
+          </FormControl>
+        )}
         <HStack justifyContent="center">
           <Button width="40%" borderRadius={20} onPress={saveDetail}>
             {detail.id ? '更新' : '添加'}

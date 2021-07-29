@@ -109,20 +109,34 @@ const transactionModel: TransactionModel = {
         cb()
       }
     },
-    *createTransaction({payload, success, fail}, {call}) {
+    *createTransaction({payload, success, fail}, {call, select}) {
       const result = yield call(axios.post, TRANSACTION_URL, payload)
       if (result) {
-        success()
+        const {transactions} = yield select((state: RootState) => state.transaction);
+        if (transactions && transactions.length > 0) {
+          transactions.unshift(result)
+        }
+        success();
       } else {
-        fail()
+        fail();
       }
     },
-    *updateTransaction({payload, success}, {call}) {
+    *updateTransaction({payload, success}, {call, select}) {
       yield call(axios.put, `${TRANSACTION_URL}/${payload.id}`, payload)
+      const {transactions} = yield select((state: RootState) => state.transaction);
+      if (transactions && transactions.length > 0) {
+        const idx = transactions.findIndex((item: ITransaction) => item.id === payload.id)
+        transactions[idx] = {...transactions[idx], ...payload}
+      }
       success()
     },
-    *deleteTransaction({payload, success}, {call}) {
+    *deleteTransaction({payload, success}, {call, select}) {
       yield call(axios.delete, `${TRANSACTION_URL}/${payload.id}`)
+      const {transactions} = yield select((state: RootState) => state.transaction);
+      if (transactions && transactions.length > 0) {
+        const idx = transactions.findIndex((item: ITransaction) => item.id === payload.id)
+        transactions.splice(idx, 1)
+      }
       success()
     },
   }

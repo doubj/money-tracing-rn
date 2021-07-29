@@ -135,7 +135,6 @@ const Transactions: React.FC<TransactionsProps> = ({transactions, categories, di
       payload: {id: deleteId},
       success: () => {
         success("删除成功")
-        onRefresh()
       }
     });
   }

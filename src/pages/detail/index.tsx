@@ -80,7 +80,7 @@ const Detail: React.FC<TransactionsDetailProps> = ({
       payload: {...detail, timestamp: dayjs().valueOf()},
       success: () => {
         success('添加成功');
-        navigation.navigate(detailType === 'transaction' ? 'Transactions' : 'Templates', {reFresh: true});
+        navigation.navigate(detailType === 'transaction' ? 'Transactions' : 'Templates');
       },
       fail: () => {
         error('添加失败');
@@ -112,7 +112,7 @@ const Detail: React.FC<TransactionsDetailProps> = ({
       payload: detail,
       success: () => {
         success('删除成功');
-        navigation.navigate(detailType === 'transaction' ? 'Transactions' : 'Templates', {reFresh: true});
+        navigation.navigate(detailType === 'transaction' ? 'Transactions' : 'Templates');
       },
     });
   };

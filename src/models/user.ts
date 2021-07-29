@@ -76,12 +76,16 @@ const userModel: UserModel = {
       navigate("Login")
     },
     *checkLogin(_, {call, put}) {
-      const user = yield call(load, {key: 'user'});
-      if(user) {
-        yield put({
-          type: 'login',
-          payload: user
-        })
+      try {
+        const user = yield call(load, {key: 'user'});
+        if(user) {
+          yield put({
+            type: 'login',
+            payload: user
+          })
+        }
+      } catch(e) {
+        console.log('no key user')
       }
     }
   }

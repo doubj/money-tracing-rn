@@ -6,8 +6,6 @@ import {
   Divider,
   Flex,
   HStack,
-  Input,
-  Modal,
   Pressable,
   ScrollView,
   Text,
@@ -17,8 +15,6 @@ import {connect, ConnectedProps} from 'react-redux';
 import {RootState} from '@/models/index';
 import {RootStackParamList} from '@/navigator/index';
 import {RouteProp} from '@react-navigation/native';
-import CategoryList from '@/components/CategoryList';
-import {ICategory} from '@/models/transaction';
 import useMessage from '@/utils/use-message';
 import dayjs from 'dayjs';
 import {wp} from '@/utils/index';
@@ -26,6 +22,8 @@ import {BottomTabNavigation} from '@/navigator/buttonTabs';
 import {getStatusBarHeight} from 'react-native-iphone-x-helper';
 import Icon from '@/assets/iconfont/index';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import CategoryModal from './CategoryModal';
+import DescModal from "./DescModal"
 
 const connector = connect(({transaction, category}: RootState) => ({
   categories: category.categories,
@@ -39,93 +37,6 @@ interface TransactionsDetailProps extends ModelState {
   route: RouteProp<RootStackParamList, 'Detail'>;
 }
 
-interface CategoryModalProps {
-  categories: ICategory[];
-  defaultCategory: ICategory;
-  visible: boolean;
-  onClose: () => void;
-  onSave: (category: ICategory) => void;
-}
-
-const CategoryModal: React.FC<CategoryModalProps> = React.memo(
-  ({categories, defaultCategory, visible, onClose, onSave}) => {
-    const [selectedCategory, setSelectedCategory] =
-      useState<ICategory>(defaultCategory);
-
-    const handleConfirm = () => {
-      onSave(selectedCategory);
-      onClose();
-    };
-
-    return (
-      <Modal isOpen={visible} onClose={onClose}>
-        <Modal.Content maxWidth="400px">
-          <Modal.Body>
-            <Center>
-              <CategoryList
-                categories={categories}
-                selectedCategory={selectedCategory.id}
-                showTypeRadio={true}
-                onSelect={(category: ICategory) =>
-                  setSelectedCategory(category)
-                }
-              />
-            </Center>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button.Group mb={2} space={2}>
-              <Button variant="ghost" colorScheme="blueGray" onPress={onClose}>
-                取消
-              </Button>
-              <Button onPress={handleConfirm}>确定</Button>
-            </Button.Group>
-          </Modal.Footer>
-        </Modal.Content>
-      </Modal>
-    );
-  },
-);
-
-interface DescModalProps {
-  visible: boolean;
-  onClose: () => void;
-  onSave: (desc: string) => void;
-}
-
-const DescModal: React.FC<DescModalProps> = React.memo(
-  ({visible, onClose, onSave}) => {
-    const [desc, setDesc] = useState('');
-
-    const handleConfirm = () => {
-      onSave(desc);
-      setDesc('');
-      onClose();
-    };
-
-    return (
-      <Modal isOpen={visible} onClose={onClose}>
-        <Modal.Content maxWidth="400px">
-          <Modal.Body>
-            <Input
-              mt={10}
-              placeholder="请输入描述"
-              value={desc}
-              onChange={({nativeEvent: {text}}) => setDesc(text)}
-            />
-          </Modal.Body>
-          <Modal.Footer>
-            <Button.Group mb={2} space={2}>
-              <Button variant="ghost" colorScheme="blueGray" onPress={onClose}>
-                取消
-              </Button>
-              <Button onPress={handleConfirm}>确定</Button>
-            </Button.Group>
-          </Modal.Footer>
-        </Modal.Content>
-      </Modal>
-    );
-  },
-);
 
 const Detail: React.FC<TransactionsDetailProps> = ({
   route,
@@ -201,20 +112,6 @@ const Detail: React.FC<TransactionsDetailProps> = ({
     return result;
   };
 
-  const deleteDetail = () => {
-    dispatch({
-      type:
-        detailType === 'transaction'
-          ? 'transaction/deleteTransaction'
-          : 'template/deleteTemplate',
-      payload: detail,
-      success: () => {
-        success('删除成功');
-        goBack();
-      },
-    });
-  };
-
   const setDetailPrice = (suffix: number | string) => {
     // 兼顾小数点的情况，应该可以优化下逻辑
     const isDot = typeof suffix === 'string';
@@ -255,7 +152,24 @@ const Detail: React.FC<TransactionsDetailProps> = ({
     setTimeout(() => navigation.goBack(), 0);
   };
 
-  const isToday = dayjs(detail.date).diff(dayjs(new Date), "days") === 0;
+  const isToday = dayjs(detail.date).diff(dayjs(new Date()), 'days') === 0;
+
+  const renderNumberItem = (
+    label: string | number | Element,
+    onPress: () => void,
+    onLongPress?: () => void
+  ) => {
+    return (
+      <Pressable
+        android_ripple={{color: 'rgba(0, 0, 0, .25)', radius: 45}}
+        onPress={onPress}
+        onLongPress={onLongPress}>
+        <Center width="100px" height="100px">
+          <Text fontSize={40}>{label}</Text>
+        </Center>
+      </Pressable>
+    );
+  };
 
   return (
     <Flex bg="#fff" flex={1} alignItems="center">
@@ -266,7 +180,9 @@ const Detail: React.FC<TransactionsDetailProps> = ({
         px={4}
         pb={4}>
         <HStack alignItems="center" justifyContent="space-between">
-          <Pressable onPress={goBack}>
+          <Pressable
+            onPress={goBack}
+            android_ripple={{color: 'rgba(0, 0, 0, .5)', radius: 16}}>
             <Icon name="icon-leftarrow" color="black" size={32} />
           </Pressable>
           <Text fontSize={24} textAlign="center">
@@ -274,7 +190,7 @@ const Detail: React.FC<TransactionsDetailProps> = ({
           </Text>
           <Pressable onPress={() => setShowDatePicker(true)}>
             <Text fontSize={14} color="#717E95" textAlign="center">
-              {isToday ? "今天" : detail.date.substr(5, detail.date.length - 1)}
+              {isToday ? '今天' : detail.date.substr(5, detail.date.length - 1)}
             </Text>
           </Pressable>
         </HStack>
@@ -328,34 +244,24 @@ const Detail: React.FC<TransactionsDetailProps> = ({
               <Flex direction="row" key={row}>
                 {Array.from({length: 3}, (_, i) => i + row * 3 - 2).map(
                   number => (
-                    <Pressable
-                      key={number}
-                      onPress={() => setDetailPrice(number)}>
-                      <Center width="100px" height="100px">
-                        <Text fontSize={40}>{number}</Text>
-                      </Center>
-                    </Pressable>
+                    <React.Fragment key={number}>
+                      {renderNumberItem(number, () => setDetailPrice(number))}
+                    </React.Fragment>
                   ),
                 )}
               </Flex>
             );
           })}
           <Flex direction="row">
-            <Pressable onPress={() => setDetailPrice('.')}>
-              <Center width="100px" height="100px">
-                <Text fontSize={40}>{'.'}</Text>
-              </Center>
-            </Pressable>
-            <Pressable onPress={() => setDetailPrice(0)}>
-              <Center width="100px" height="100px">
-                <Text fontSize={40}>0</Text>
-              </Center>
-            </Pressable>
-            <Pressable onPress={sliceDetailPrice}>
+            {renderNumberItem('.', () => setDetailPrice('.'))}
+            {renderNumberItem(0, () => setDetailPrice(0))}
+            {renderNumberItem(
               <Center width="100px" height="100px">
                 <Icon name="icon-leftarrow" color="black" size={40} />
-              </Center>
-            </Pressable>
+              </Center>,
+              sliceDetailPrice,
+              () => setDetail({...detail, price: 0})
+            )}
           </Flex>
         </Center>
         <Button

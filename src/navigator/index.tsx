@@ -81,7 +81,7 @@ export default () => {
           component={Filter}
         />
         <Stack.Screen
-          options={{headerTitle: '详情', headerShown: true}}
+          options={{headerTitle: '详情', headerShown: false}}
           name="Detail"
           component={Detail}
         />

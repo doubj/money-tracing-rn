@@ -124,7 +124,7 @@ const Home: React.FC<HomeProps> = ({
             fontSize="xs"
             color="gray.400"
             mt={4}
-            bold>{`不积跬步，无以至千里 :) 不积小流，无以成江海`}</Text>
+            bold>{`Keep going and you will become better`}</Text>
         </Flex>
       </Box>
       <ScrollView>

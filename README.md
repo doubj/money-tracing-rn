@@ -1,6 +1,24 @@
 # 介绍
 
-A simple react-native app for money-tracing
+比起Web记账，App记账的场景应该更多些
+
+### 登录
+
+![](./preview/login.png)
+
+
+
+### 首页
+
+![](./preview/home.png)
+
+### 列表页
+
+![](./preview/list.png)
+
+### 编辑页
+
+![](./preview/edit.png)
 
 # TODO
 
@@ -24,3 +42,4 @@ A simple react-native app for money-tracing
 ## 优化
 - [ ] 描述模糊查找用放在独立的导航中，并在本地存储历史查找
 - [ ] 完善TODO，代码优化
+

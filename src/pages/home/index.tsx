@@ -17,7 +17,8 @@ const namespace = 'home';
 
 const connector = connect(({home}: RootState) => ({
   totalBalance: home.totalBalance,
-  transactions: home.transactions,
+  transactionsInSevenDays: home.transactionsInSevenDays,
+  lastFiveTransactions: home.lastFiveTransactions,
 }));
 
 type ModelState = ConnectedProps<typeof connector>;
@@ -65,17 +66,9 @@ const Home: React.FC<HomeProps> = ({
   navigation,
   totalBalance,
   dispatch,
-  transactions,
+  transactionsInSevenDays,
+  lastFiveTransactions,
 }) => {
-  const data = [
-    {value: 40, date: '07/16'},
-    {value: 44, date: '07/17'},
-    {value: 50, date: '07/18'},
-    {value: 46, date: '07/19'},
-    {value: 50, date: '07/20'},
-    {value: 70, date: '07/21'},
-  ];
-
   const [lineChartState, setLineChartState] = useState<LineCartViewProps>({
     xDatas: [],
     yDatas: [],
@@ -84,12 +77,13 @@ const Home: React.FC<HomeProps> = ({
 
   useMount(() => {
     dispatch({type: `${namespace}/fetchTotalBalance`});
-    dispatch({type: `${namespace}/fetchTransaction`});
+    dispatch({type: `${namespace}/fetchTransactionInSevenDays`});
+    dispatch({type: `${namespace}/fetchLastFiveTransactions`});
   });
 
   useEffect(() => {
     const valueMap: {[key: string]: number} = {};
-    transactions.forEach(item => {
+    transactionsInSevenDays.forEach((item: ITransaction) => {
       if (item.category.type === 'expense') {
         let {date, price} = item;
         date = date.substring(5).replace('-', '/');
@@ -101,9 +95,11 @@ const Home: React.FC<HomeProps> = ({
     setLineChartState({
       ...lineChartState,
       xDatas: Object.keys(valueMap).reverse(),
-      yDatas: Object.keys(valueMap).map(key => valueMap[key]).reverse(),
+      yDatas: Object.keys(valueMap)
+        .map(key => valueMap[key])
+        .reverse(),
     });
-  }, [transactions]);
+  }, [transactionsInSevenDays]);
 
   return (
     <Flex flex={1} alignItems="center">
@@ -156,7 +152,14 @@ const Home: React.FC<HomeProps> = ({
             <Text mt={3} fontSize="md" color="blueGray.400" bold>
               近七天支出
             </Text>
-            {lineChartState.xDatas.length > 0 && <LineCartView {...lineChartState} />}
+            {lineChartState.xDatas.length === 0 ? (
+              <Center mt={24}>
+                <Text fontSize={12} color="gray.400">近七天还没有支出哦🥺</Text>
+                <Text fontSize={12} color="gray.400">快去添加一项收支记录一下吧！~</Text>
+              </Center>
+            ) : (
+              <LineCartView {...lineChartState} />
+            )}
           </Box>
           <Box bg="white" mt={4} rounded="xl" px={1} width={viewportWidth - 5}>
             <Box
@@ -166,7 +169,10 @@ const Home: React.FC<HomeProps> = ({
               alignItems="center"
               justifyContent="space-between">
               <Text fontSize="md" color="blue.400" bold>
-                交易记录<Text fontSize="xs" color="gray.400">{"(近五次)"}</Text>
+                交易记录
+                <Text fontSize="xs" color="gray.400">
+                  {'(近五次)'}
+                </Text>
               </Text>
               <Text
                 onPress={() => navigation.navigate('Transactions', {})}
@@ -179,9 +185,7 @@ const Home: React.FC<HomeProps> = ({
               </Text>
             </Box>
             <Divider px={2} />
-            <VStack width="100%">
-              {transactions.slice(0, 5).map(renderItem)}
-            </VStack>
+            <VStack width="100%">{lastFiveTransactions.map(renderItem)}</VStack>
           </Box>
         </Flex>
       </ScrollView>

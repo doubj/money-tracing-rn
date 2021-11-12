@@ -7,7 +7,8 @@ import dayjs from 'dayjs'
 
 export interface HomeState {
   totalBalance: number,
-  transactions: ITransaction[]
+  transactionsInSevenDays: ITransaction[]
+  lastFiveTransactions: ITransaction[]
 }
 
 interface HomeModel extends Model {
@@ -18,13 +19,15 @@ interface HomeModel extends Model {
   },
   effects: {
     fetchTotalBalance: Effect,
-    fetchTransaction: Effect
+    fetchTransactionInSevenDays: Effect,
+    fetchLastFiveTransactions: Effect
   }
 }
 
 const initialState: HomeState = {
   totalBalance: 0,
-  transactions: []
+  transactionsInSevenDays: [],
+  lastFiveTransactions: []
 }
 
 const homeModel: HomeModel = {
@@ -48,7 +51,7 @@ const homeModel: HomeModel = {
         }
       })
     },
-    *fetchTransaction(_, {call, put}) {
+    *fetchTransactionInSevenDays(_, {call, put}) {
       const formatStr = "YYYY-MM-DD"
       const params = {
         date_$gte: dayjs().subtract(7, "days").format(formatStr),
@@ -58,7 +61,16 @@ const homeModel: HomeModel = {
       yield put({
         type: 'setState',
         payload: {
-          transactions: list,
+          transactionsInSevenDays: list,
+        }
+      })
+    },
+    *fetchLastFiveTransactions(_, {call, put}) {
+      const { list } = yield call(axios.get, "/record", {params: {_page: 1, _limit: 5}})
+      yield put({
+        type: 'setState',
+        payload: {
+          lastFiveTransactions: list,
         }
       })
     }

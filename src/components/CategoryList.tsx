@@ -66,6 +66,7 @@ const CategoryList: React.FC<CategoryListProps> = React.memo(
           </Flex>
           {showTypeRadio && (
             <Radio.Group
+              mt={4}
               flexDirection="row"
               name="myRadioGroup"
               value={selectedType}
